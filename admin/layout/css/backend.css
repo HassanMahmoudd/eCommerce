@@ -1,0 +1,24 @@
+body {
+    background-color: #f4f4f4
+}
+
+.login {
+    width: 300px;
+    margin: 100px auto
+}
+
+.login h4 {
+    color: #888
+}
+
+.login input {
+    margin-bottom: 10px
+}
+
+.login .form-control {
+    background-color: #eaeaea
+}
+
+.login .btn {
+    background-color: #008dde
+}
