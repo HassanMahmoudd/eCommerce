@@ -71,7 +71,7 @@
                                         
                                         if($row['RegStatus'] == 0) {
                                         
-                                        echo "<a href='members.php?do=Activate&userid=" . $row['UserID'] . "' class='btn btn-info activate'><i class='fa fa-close'></i> Activate</a>";
+                                        echo "<a href='members.php?do=Activate&userid=" . $row['UserID'] . "' class='btn btn-info activate'><i class='fa fa-check'></i> Activate</a>";
                                         }
                                 echo "</td>";
                             echo "</tr>";
@@ -247,7 +247,7 @@
             
             $theMsg = '<div class="alert alert-danger">Sorry You Can\'t Browse This Page Directly</div>';
             
-            redirectHome($theMsg, 'back', 3);
+            redirectHome($theMsg);
             
             echo "</div>";
         }
@@ -287,7 +287,7 @@
             <h1 class="text-center">Edit Member</h1>
             <div class="container">
                 <form class="form-horizontal" action="?do=Update" method="POST">
-                    <input type="hidden" name="userid" value="<?php echo $userid ?>"
+                    <input type="hidden" name="userid" value="<?php echo $userid ?>">
                     <!-- Start Username Field -->
                     <div class="form-group form-group-lg">
                         <label class="col-sm-2 control-label">Username</label>
