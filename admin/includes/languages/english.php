@@ -4,9 +4,13 @@
         
         static $lang = array(
         
-            'MESSAGE' => 'Welcome',
-            
-            'ADMIN' => 'Administrator'
+                // Navbar Links
+				'HOME_ADMIN' 		    => 'Home',
+				'CATEGORIES' 		    => 'Categories',
+				'ITEMS'                 => 'Items',
+                'MEMBERS'               => 'Members',
+                'STATISTICS'            => 'Statistics',
+                'LOGS'                  => 'Logs'
             
         );
         
