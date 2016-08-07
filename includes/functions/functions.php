@@ -17,6 +17,27 @@
         return $all;
     }
 
+    
+    /* Check if user isn't activated
+    function to check the restatus of the user
+    */
+
+    function checkUserStatus($user) {
+        
+        // Check if the user exist in database
+        
+        global $con;
+        
+        $stmtx = $con->prepare("SELECT Username, RegStatus FROM users WHERE Username = ? AND RegStatus = 0");
+        
+        $stmtx->execute(array($user));
+       
+        $status = $stmtx->rowCount();
+        
+        return $status;
+        
+    }
+
     /* Title function that echo the page title in case the page v 1.0 
     has the variable $pageTitle and echo defaul for other pages */
 

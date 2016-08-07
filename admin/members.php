@@ -31,7 +31,7 @@
         
         // Select All users except admin
         
-        $stmt = $con->prepare("SELECT * FROM users WHERE GroupID != 1 $query");
+        $stmt = $con->prepare("SELECT * FROM users WHERE GroupID != 1 $query ORDER BY UserID DESC");
         
         // Execute the statement
         
@@ -40,6 +40,9 @@
         // Assign To Variable
         
         $rows = $stmt->fetchAll();
+        
+        if(!empty($rows)) {
+            
         
         ?>
 
@@ -83,6 +86,18 @@
             </div>
             <a href="members.php?do=Add" class="btn btn-primary"><i class="fa fa-plus"></i> New Member</a>
         </div>
+
+        <?php } 
+            else {
+                
+                echo '<div class="container">';
+                    echo '<div class="nice-message">There\'s No Members To Show</div>';
+                    echo '<a href="members.php?do=Add" class="btn btn-primary"><i class="fa fa-plus"></i> New Member</a>';
+                echo '</div>';
+                
+            }
+        ?>
+
         <?php
     }
         
@@ -414,19 +429,20 @@
             
             if(empty($formErrors)) {
                 
-                // Check if user exist in database
+                $stmt2 = $con->prepare("SELECT * FROM users WHERE Username = ? AND UserID != ?");
                 
-                $check = checkItem("Username", "users", $user);
+                $stmt2->execute(array($user, $id));
                 
-                if ($check == 1) {
+                $count = $stmt2->rowCount();
+                
+                if($count == 1) {
                     
-                    $theMsg = '<div class="alert alert-danger">Sorry This User Exists</div>';
+                    $theMsg = "<div class='alert alert-danger'>Sorry This User Exists</div>";
                     
-                    redirectHome($theMsg, 'back');
+                    redirectHome($theMsg, 'back', 3);
                 }
-                
                 else {
-                    
+                
                     // Update the database with this info
 
                     $stmt = $con->prepare("UPDATE users SET Username = ?, Email = ?, FullName = ?, Password = ? WHERE UserID = ?");
@@ -437,7 +453,11 @@
                     $theMsg = "<div class='alert alert-success'>" . $stmt->rowCount() . ' Record Updated</div>';
 
                     redirectHome($theMsg, 'back', 3);
+
+                    
                 }
+                    
+                                
                 
                 
             }
@@ -481,7 +501,7 @@
             
             $theMsg = "<div class='alert alert-success'>" . $stmt->rowCount() . ' Record Deleted</div>';
             
-            redirectHome($theMsg);
+            redirectHome($theMsg, 'back');
             
         }
         else {

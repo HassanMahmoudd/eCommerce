@@ -13,6 +13,13 @@ body {
     color: #d20707
 }
 
+.nice-message {
+    padding: 10px;
+    background-color: #fff;
+    margin: 10px 0;
+    border-left: 5px solid #080
+}
+
 /* End Main Rules */
 
 /* Start Login Form */
@@ -88,7 +95,20 @@ body {
     border-radius: 10px;
     padding: 20px;
     font-size: 15px;
-    color: #fff
+    color: #fff;
+    position: relative;
+    overflow: hidden
+}
+
+.home-stats .stat i {
+    position: absolute;
+    font-size: 80px;
+    top: 35px;
+    left: 30px
+}
+
+.home-stats .stat .info {
+    float: right
 }
 
 .home-stats .stat a {
@@ -124,6 +144,15 @@ body {
     margin-top: 30px
 }
 
+.latest .toggle-info {
+    color: #999;
+    cursor: pointer
+}
+
+.latest .toggle-info:hover {
+    color: #444
+}
+
 .latest-users {
     margin-bottom: 0
 }
@@ -144,6 +173,47 @@ body {
 
 .latest-users .btn-info {
     margin-right: 5px
+}
+
+.latest .comment-box {
+    margin: 5px 0 10px;
+}
+
+.latest .comment-box {
+    display: block
+}
+
+.latest .comment-box .member-n,
+.latest .comment-box .member-c {
+    float: left
+}
+
+.latest .comment-box .member-c {
+    width: calc(100% - 160px);
+    background-color: #efefef;
+    padding: 10px;
+    position: relative
+}
+
+.latest .comment-box .member-c:before {
+    content: "";
+    display: block;
+    position: absolute;
+    left: -28px;
+    top: 5px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-color: transparent #efefef transparent transparent;
+    border-width: 15px
+}
+
+.latest .comment-box .member-n {
+    width: 120px;
+    text-align: center;
+    margin-right: 40px;
+    position: relative;
+    top: 10px
 }
 
 /* End Dashboard Page */
@@ -295,6 +365,30 @@ h1 {
 .categories .add-category {
     margin-top: -10px;
     margin-bottom: 30px
+}
+
+.categories .child-cats {
+    margin: 0
+}
+
+.categories .child-head {
+    margin: 15px 0 10px;
+    font-weight: bold;
+    font-size: 16px;
+    color: #22ab79
+}
+
+.categories .child-cats li {
+    margin-left: 15px
+}
+
+.categories .child-cats li:before {
+    content: '- '
+}
+
+.categories .show-delete {
+    color: #f00;
+    display: none
 }
 
 /* End Category Page */

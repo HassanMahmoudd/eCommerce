@@ -33,7 +33,9 @@
                                     INNER JOIN
                                         users
                                     ON
-                                        users.UserID = items.Member_ID");
+                                        users.UserID = items.Member_ID
+                                    ORDER BY
+                                        Item_ID DESC");
 
             // Execute the statement
 
@@ -42,7 +44,11 @@
             // Assign To Variable
 
             $items = $stmt->fetchAll();
-
+                
+            if(!empty($items)) {
+                
+                
+        
             ?>
 
             <h1 class="text-center">Manage Items</h1>
@@ -88,6 +94,18 @@
                 </div>
                 <a href="items.php?do=Add" class="btn btn-sm btn-primary"><i class="fa fa-plus"></i> Add Item</a>
             </div>
+
+            <?php } 
+            else {
+                
+                echo '<div class="container">';
+                    echo '<div class="nice-message">There\'s No Items To Show</div>';
+                    echo '<a href="items.php?do=Add" class="btn btn-sm btn-primary"><i class="fa fa-plus"></i> Add Item</a>';
+                echo '</div>';
+                
+            }
+            ?>
+
             <?php
             
             
@@ -101,7 +119,7 @@
 
             <h1 class="text-center">Add New Item</h1>
             <div class="container">
-                <form class="form-horizontal" action="?do=Insert" method="POST">
+                <form class="form-horizontal" action="?do=Insert" method="POST" enctype="multipart/form-data">
                     <!-- Start Name Field -->
                     <div class="form-group form-group-lg">
                         <label class="col-sm-2 control-label">Name</label>
@@ -126,14 +144,14 @@
                         </div>
                     </div>
                     <!-- End Price Field -->
-                    <!-- Start Price Field -->
+                    <!-- Start Country Field -->
                     <div class="form-group form-group-lg">
                         <label class="col-sm-2 control-label">Country</label>
                         <div class="col-sm-10 col-md-6">
                             <input type="text" name="country" class="form-control" required="required" placeholder="Country Of Made">
                         </div>
                     </div>
-                    <!-- End Price Field -->
+                    <!-- End Country Field -->
                     <!-- Start Status Field -->
                     <div class="form-group form-group-lg">
                         <label class="col-sm-2 control-label">Status</label>
@@ -155,10 +173,9 @@
                             <select class="form-control" name="member">
                                 <option value="0">...</option>
                                 <?php
-                                    $stmt = $con->prepare("SELECT * FROM users");
-                                    $stmt->execute();
-                                    $users = $stmt->fetchAll();
-                                    foreach ($users as $user) {
+                                    $allMembers = getAllFrom("*", "users", "", "", "UserID");
+                                   
+                                    foreach ($allMembers as $user) {
                                         echo "<option value='" . $user['UserID'] . "'>" . $user['Username'] . "</option>";
                                     }
                                 ?>
@@ -173,17 +190,36 @@
                             <select class="form-control" name="category">
                                 <option value="0">...</option>
                                 <?php
-                                    $stmt2 = $con->prepare("SELECT * FROM categories");
-                                    $stmt2->execute();
-                                    $cats = $stmt2->fetchAll();
-                                    foreach ($cats as $cat) {
+                                    $allCats = getAllFrom("*", "categories", "where parent = 0", "", "ID");
+                                
+                                    foreach ($allCats as $cat) {
                                         echo "<option value='" . $cat['ID'] . "'>" . $cat['Name'] . "</option>";
+                                        $childCats = getAllFrom("*", "categories", "where parent = {$cat['ID']}", "", "ID");
+                                        foreach ($childCats as $child) {
+                                            echo "<option value='" . $child['ID'] . "'>--- " . $child['Name'] . "</option>";
+                                        }
                                     }
                                 ?>
                             </select>
                         </div>
                     </div>
                     <!-- End Categories Field -->
+                    <!-- Start Tags Field -->
+                    <div class="form-group form-group-lg">
+                        <label class="col-sm-2 control-label">Tags</label>
+                        <div class="col-sm-10 col-md-6">
+                            <input type="text" name="tags" class="form-control" placeholder="Separate Tags With Comma (,)">
+                        </div>
+                    </div>
+                    <!-- End Tags Field -->
+                    <!-- Start Image Upload Field -->
+                        <div class="form-group form-group-lg">
+                            <label class="col-sm-2 control-label">Image</label>
+                            <div class="col-sm-10 col-md-6">
+                                <input type="file" name="image" class="form-control" required="required">
+                            </div>
+                        </div>
+                        <!-- End Image Upload Field -->
                     <!-- Start Save Field -->
                     <div class="form-group form-group-lg">
                         <div class="col-sm-offset-2 col-sm-10">
@@ -217,6 +253,7 @@
                 $status = $_POST['status'];
                 $member = $_POST['member'];
                 $cat = $_POST['category'];
+                $tags = $_POST['tags'];
 
 
                 // Validate The Form
@@ -271,7 +308,7 @@
 
                     // Insert Userinfo in the database
 
-                    $stmt = $con->prepare("INSERT INTO items(Name, Description, Price, Country_Made, Status, Add_Date, Cat_ID, Member_ID) VALUES(:zname, :zdesc, :zprice, :zcountry, :zstatus, now(), :zcat, :zmember)");
+                    $stmt = $con->prepare("INSERT INTO items(Name, Description, Price, Country_Made, Status, Add_Date, Cat_ID, Member_ID, tags) VALUES(:zname, :zdesc, :zprice, :zcountry, :zstatus, now(), :zcat, :zmember, :ztags)");
 
                     $stmt->execute(array(
 
@@ -281,7 +318,42 @@
                         'zcountry' => $country,
                         'zstatus' => $status,
                         'zcat' => $cat,
-                        'zmember' => $member
+                        'zmember' => $member,
+                        'ztags' => $tags
+                    ));
+
+                    $id = $con->lastInsertId();
+
+                    $image_tmp_name = $_FILES['image']['tmp_name'];
+
+                    $imagetypes = array(
+                            'image/png' => '.png',
+                            'image/gif' => '.gif',
+                            'image/jpeg' => '.jpg',
+                            'image/bmp' => '.bmp');
+
+                    $extension = $imagetypes[$_FILES['image']['type']];
+
+                    //$extension1 = end(explode(".", $image_tmp_name));
+
+                    //echo $extension1;
+
+                    //$extension = $_FILES['image']['type'];
+
+                    //$new_name = $_SESSION['user'] . "_" . $id . $extension;
+
+                    $new_name = $id . $extension;
+
+
+                    move_uploaded_file($image_tmp_name, "../layout/images/" .$new_name);
+
+                    $stmt = $con->prepare("UPDATE items SET Image_Name = ? WHERE Item_ID = ?");
+
+                    $stmt->execute(array(
+
+                        $new_name,
+                        $id
+
                     ));
 
                     // Echo success message
@@ -341,7 +413,7 @@
 
                 <h1 class="text-center">Edit Item</h1>
                 <div class="container">
-                    <form class="form-horizontal" action="?do=Update" method="POST">
+                    <form class="form-horizontal" action="?do=Update" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="itemid" value="<?php echo $itemid ?>">
                         <!-- Start Name Field -->
                         <div class="form-group form-group-lg">
@@ -425,6 +497,22 @@
                             </div>
                         </div>
                         <!-- End Categories Field -->
+                        <!-- Start Tags Field -->
+                        <div class="form-group form-group-lg">
+                            <label class="col-sm-2 control-label">Tags</label>
+                            <div class="col-sm-10 col-md-6">
+                                <input type="text" name="tags" class="form-control" placeholder="Separate Tags With Comma (,)" value="<?php echo $item['tags'] ?>">
+                            </div>
+                        </div>
+                        <!-- End Tags Field -->
+                        <!-- Start Image Upload Field -->
+                        <div class="form-group form-group-lg">
+                            <label class="col-sm-2 control-label">Image</label>
+                            <div class="col-sm-10 col-md-6">
+                                <input type="file" name="image" class="form-control" required="required">
+                            </div>
+                        </div>
+                        <!-- End Image Upload Field -->
                         <!-- Start Save Field -->
                         <div class="form-group form-group-lg">
                             <div class="col-sm-offset-2 col-sm-10">
@@ -433,6 +521,63 @@
                         </div>
                         <!-- End Save Field -->
                     </form>
+                    
+                    <?php
+                    
+                    // Select All users except admin
+        
+                    $stmt = $con->prepare("SELECT comments.*, users.Username AS Member
+                    FROM comments
+                    INNER JOIN users
+                    ON users.UserID = comments.user_id
+                    WHERE item_id = ?");
+
+                    // Execute the statement
+
+                    $stmt->execute(array($itemid));
+
+                    // Assign To Variable
+
+                    $rows = $stmt->fetchAll();
+                            
+                    if (!empty($rows)) {
+
+                    ?>
+
+                    <h1 class="text-center">Manage [ <?php echo $item['Name'] ?> ] Comments</h1>
+                    <div class="table-responsive">
+                        <table class="main-table text-center table table-bordered">
+                            <tr>
+                                <td>Comment</td>
+                                <td>Username</td>
+                                <td>Added Date</td>
+                                <td>Control</td>
+                            </tr>
+
+                            <?php
+                                foreach($rows as $row) {
+
+                                    echo "<tr>";
+                                        echo "<td>" . $row['comment'] . "</td>";
+                                        echo "<td>" . $row['Member'] . "</td>";
+                                        echo "<td>" . $row['comment_date'] . "</td>";
+                                        echo "<td>
+                                                <a href='comments.php?do=Edit&comid=" . $row['c_id'] . "' class='btn btn-success'><i class='fa fa-edit'></i> Edit</a>
+                                                <a href='comments.php?do=Delete&comid=" . $row['c_id'] . "' class='btn btn-danger confirm'><i class='fa fa-close'></i> Delete</a>";
+
+                                                if($row['status'] == 0) {
+
+                                                echo "<a href='comments.php?do=Approve&comid=" . $row['c_id'] . "' class='btn btn-info activate'><i class='fa fa-check'></i> Approve</a>";
+                                                }
+                                        echo "</td>";
+                                    echo "</tr>";
+                                }
+
+                            ?>
+
+                        </table>
+                    </div>
+                    <?php } ?>
                 </div>
 
             <?php
@@ -472,6 +617,7 @@
                 $status = $_POST['status'];
                 $cat = $_POST['category'];
                 $member = $_POST['member'];
+                $tags = $_POST['tags'];
                 
 
                 // Validate The Form
@@ -528,8 +674,42 @@
                     // Update the database with this info
 
                     $stmt = $con->prepare("UPDATE items SET Name = ?, Description = ?, Price = ?, Country_Made = ?,
-                    Status = ?, Cat_ID = ?, Member_ID = ? WHERE Item_ID = ?");
-                    $stmt->execute(array($name, $desc, $price, $country, $status, $cat, $member, $id));
+                    Status = ?, Cat_ID = ?, Member_ID = ?, tags = ? WHERE Item_ID = ?");
+                    $stmt->execute(array($name, $desc, $price, $country, $status, $cat, $member, $tags, $id));
+
+                    $id = $con->lastInsertId();
+
+                    $image_tmp_name = $_FILES['image']['tmp_name'];
+
+                    $imagetypes = array(
+                            'image/png' => '.png',
+                            'image/gif' => '.gif',
+                            'image/jpeg' => '.jpg',
+                            'image/bmp' => '.bmp');
+
+                    $extension = $imagetypes[$_FILES['image']['type']];
+
+                    //$extension1 = end(explode(".", $image_tmp_name));
+
+                    //echo $extension1;
+
+                    //$extension = $_FILES['image']['type'];
+
+                    //$new_name = $_SESSION['user'] . "_" . $id . $extension;
+
+                    $new_name = $id . $extension;
+
+
+                    move_uploaded_file($image_tmp_name, "../layout/images/" .$new_name);
+
+                    $stmt = $con->prepare("UPDATE items SET Image_Name = ? WHERE Item_ID = ?");
+
+                    $stmt->execute(array(
+
+                        $new_name,
+                        $id
+
+                    ));
 
                     // Echo success message
 
@@ -557,7 +737,7 @@
             
             // Delete Item Page
         
-            echo "<h1 class='text-center'>Delete Member</h1>";
+            echo "<h1 class='text-center'>Delete Item</h1>";
             echo "<div class='container'>";
 
             // Check if get request itemid is numeric & get the integer value of it

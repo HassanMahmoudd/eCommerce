@@ -4,6 +4,24 @@ $(function () {
     
     'use strict';
     
+    // Dashboard
+    
+    $('.toggle-info').click(function () {
+        
+        $(this).toggleClass('selected').parent().next('.panel-body').fadeToggle(100);
+       
+        if($(this).hasClass('selected')) {
+            
+            $(this).html('<i class="fa fa-minus fa-lg"></i>');
+        }
+        
+        else {
+            
+            $(this).html('<i class="fa fa-plus fa-lg"></i>');
+        }
+        
+    });
+    
     // Trigger the SelectBoxIt
     
     $("select").selectBoxIt( {
@@ -80,6 +98,18 @@ $(function () {
             
         }
         
+    });
+    
+    // Show Delete Button On Child Cats
+    
+    $('.child-link').hover(function () {
+        
+       $(this).find('.show-delete').fadeIn(400);
+        
+    }, function () {
+        
+        
+        $(this).find('.show-delete').fadeOut(400);
     });
     
 });
